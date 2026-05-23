@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JKGO派車助手</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei",sans-serif;
+    background:#f5f5f5;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.topbar{
+    background:#ff8800;
+    color:white;
+    padding:18px 25px;
+    font-size:26px;
+    font-weight:bold;
+    border-radius:10px 10px 0 0;
+}
+
+.form-area{
+    background:white;
+    padding:25px;
+    border-radius:0 0 10px 10px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.input-group{
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+    color:#333;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:16px;
+}
+
+.btn{
+    margin-top:20px;
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:8px;
+    font-size:18px;
+    cursor:pointer;
+    color:white;
+}
+
+.generate{
+    background:#111827;
+}
+
+.download{
+    background:#2563eb;
+}
+
+.card{
+    margin-top:30px;
+    background:white;
+    border:1px solid #ddd;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.card-header{
+    background:#ff4d5a;
+    color:white;
+    padding:18px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.dispatch-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:25px;
+    padding:25px;
+}
+
+.item{
+    margin-bottom:18px;
+}
+
+.item-title{
+    font-size:14px;
+    color:#666;
+    margin-bottom:5px;
+}
+
+.item-box{
+    border:1px solid #ccc;
+    padding:12px;
+    background:#fafafa;
+    border-radius:5px;
+    min-height:24px;
+}
+
+.footer{
+    padding:20px;
+    text-align:center;
+    color:#999;
+}
+
+@media(max-width:768px){
+
+.grid,
+.dispatch-grid{
+    grid-template-columns:1fr;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="topbar">
+✈️ JKGO派出助手
+</div>
+
+<div class="form-area">
+
+<div class="grid">
+
+<div>
+
+<div class="input-group">
+<label>日期</label>
+<input type="text" id="date">
+</div>
+
+<div class="input-group">
+<label>乘客姓名</label>
+<input type="text" id="name">
+</div>
+
+<div class="input-group">
+<label>上車地點</label>
+<input type="text" id="pickup">
+</div>
+
+<div class="input-group">
+<label>搭乘人數</label>
+<input type="text" id="people">
+</div>
+
+<div class="input-group">
+<label>航班資訊</label>
+<input type="text" id="flight">
+</div>
+
+</div>
+
+<div>
+
+<div class="input-group">
+<label>時間</label>
+<input type="text" id="time">
+</div>
+
+<div class="input-group">
+<label>連絡電話</label>
+<input type="text" id="phone">
+</div>
+
+<div class="input-group">
+<label>下車地點</label>
+<input type="text" id="dropoff">
+</div>
+
+<div class="input-group">
+<label>行李件數</label>
+<input type="text" id="bags">
+</div>
+
+<div class="input-group">
+<label>客服備註</label>
+<input type="text" id="remark">
+</div>
+
+</div>
+
+</div>
+
+<button class="btn generate" onclick="generateCard()">
+🚗 產生派車單
+</button>
+
+<button class="btn download" onclick="downloadCard()">
+📥 下載派車單圖片
+</button>
+
+</div>
+
+<div id="dispatchCard" class="card" style="display:none;">
+
+<div class="card-header">
+JKGO派車單｜機場接送
+</div>
+
+<div class="dispatch-grid">
+
+<div>
+
+<div class="item">
+<div class="item-title">日期</div>
+<div class="item-box" id="showDate"></div>
+</div>
+
+<div class="item">
+<div class="item-title">乘客姓名</div>
+<div class="item-box" id="showName"></div>
+</div>
+
+<div class="item">
+<div class="item-title">上車地點</div>
+<div class="item-box" id="showPickup"></div>
+</div>
+
+<div class="item">
+<div class="item-title">搭乘人數</div>
+<div class="item-box" id="showPeople"></div>
+</div>
+
+<div class="item">
+<div class="item-title">航班資訊</div>
+<div class="item-box" id="showFlight"></div>
+</div>
+
+</div>
+
+<div>
+
+<div class="item">
+<div class="item-title">時間</div>
+<div class="item-box" id="showTime"></div>
+</div>
+
+<div class="item">
+<div class="item-title">連絡電話</div>
+<div class="item-box" id="showPhone"></div>
+</div>
+
+<div class="item">
+<div class="item-title">下車地點</div>
+<div class="item-box" id="showDropoff"></div>
+</div>
+
+<div class="item">
+<div class="item-title">行李件數</div>
+<div class="item-box" id="showBags"></div>
+</div>
+
+<div class="item">
+<div class="item-title">客服備註</div>
+<div class="item-box" id="showRemark"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+JKGO派車助手｜Airport Transfer Dispatch System
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+
+function generateCard(){
+
+document.getElementById("dispatchCard").style.display = "block";
+
+document.getElementById("showDate").innerText =
+document.getElementById("date").value;
+
+document.getElementById("showName").innerText =
+document.getElementById("name").value;
+
+document.getElementById("showPickup").innerText =
+document.getElementById("pickup").value;
+
+document.getElementById("showPeople").innerText =
+document.getElementById("people").value;
+
+document.getElementById("showFlight").innerText =
+document.getElementById("flight").value;
+
+document.getElementById("showTime").innerText =
+document.getElementById("time").value;
+
+document.getElementById("showPhone").innerText =
+document.getElementById("phone").value;
+
+document.getElementById("showDropoff").innerText =
+document.getElementById("dropoff").value;
+
+document.getElementById("showBags").innerText =
+document.getElementById("bags").value;
+
+document.getElementById("showRemark").innerText =
+document.getElementById("remark").value;
+
+}
+
+function downloadCard(){
+
+const card = document.getElementById("dispatchCard");
+
+if(card.style.display === "none"){
+alert("請先產生派車單");
+return;
+}
+
+html2canvas(card,{
+scale:2
+}).then(canvas=>{
+
+const link = document.createElement("a");
+
+link.download = "JKGO派車單.png";
+
+link.href = canvas.toDataURL("image/png");
+
+link.click();
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
