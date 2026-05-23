@@ -432,6 +432,8 @@ document.getElementById("remark").value;
 
 }
 
+<script>
+
 async function downloadCard(){
 
 const card = document.getElementById("dispatchCard");
@@ -462,44 +464,69 @@ const canvas = await html2canvas(card,{
 
 });
 
-canvas.toBlob(function(blob){
+canvas.toBlob(async function(blob){
 
-    // iPhone / Android 共用
-    const file = new File(
-        [blob],
-        "JKGO派車單.png",
-        {type:"image/png"}
-    );
+    const ua = navigator.userAgent;
 
-    // 手機分享/儲存
-    if(navigator.canShare && navigator.canShare({files:[file]})){
+    // ===== 手機版 =====
+    const isMobile =
+        /Android|iPhone|iPad|iPod/i.test(ua);
 
-        navigator.share({
-            files:[file],
-            title:"JKGO派車單"
-        });
+    if(isMobile){
+
+        const file = new File(
+            [blob],
+            "JKGO派車單.png",
+            {type:"image/png"}
+        );
+
+        // 手機分享
+        if(navigator.canShare &&
+           navigator.canShare({files:[file]})){
+
+            await navigator.share({
+                files:[file],
+                title:"JKGO派車單"
+            });
+
+        }else{
+
+            // 手機備援
+            const imageUrl =
+                URL.createObjectURL(blob);
+
+            window.open(imageUrl,"_blank");
+        }
 
     }else{
 
-        // 電腦版
-        const link = document.createElement("a");
+        // ===== 電腦版直接下載 =====
+        const link =
+            document.createElement("a");
 
-        link.href = URL.createObjectURL(blob);
+        const imageUrl =
+            URL.createObjectURL(blob);
+
+        link.href = imageUrl;
 
         link.download = "JKGO派車單.png";
 
+        document.body.appendChild(link);
+
         link.click();
 
-        URL.revokeObjectURL(link.href);
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(imageUrl);
     }
 
 },"image/png");
 
 }catch(err){
 
-    alert("圖片產生失敗");
-
     console.log(err);
+
+    alert("圖片下載失敗");
 
 }
 
